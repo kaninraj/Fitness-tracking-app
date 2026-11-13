@@ -1,0 +1,137 @@
+from flask import Flask, render_template, request, redirect, session
+import sqlite3
+
+app = Flask(__name__)
+app.secret_key = "fitness123"
+
+# Database connection
+def connect_db():
+    return sqlite3.connect("fitness.db")
+
+# Create database tables
+def create_table():
+    con = connect_db()
+    cur = con.cursor()
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        email TEXT,
+        password TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS workouts(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        exercise TEXT,
+        duration INTEGER,
+        calories INTEGER
+    )
+    """)
+
+    con.commit()
+    con.close()
+
+create_table()
+
+# Home page
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+# Registration
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        email = request.form["email"]
+        password = request.form["password"]
+
+        con = connect_db()
+        cur = con.cursor()
+
+        cur.execute(
+            "INSERT INTO users(username,email,password) VALUES(?,?,?)",
+            (username, email, password)
+        )
+
+        con.commit()
+        con.close()
+
+        return redirect("/login")
+
+    return render_template("register.html")
+
+# Login
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+
+        con = connect_db()
+        cur = con.cursor()
+
+        cur.execute(
+            "SELECT * FROM users WHERE email=? AND password=?",
+            (email, password)
+        )
+
+        user = cur.fetchone()
+        con.close()
+
+        if user:
+            session["username"] = user[1]
+            return redirect("/dashboard")
+
+        return "Invalid Login Details"
+
+    return render_template("login.html")
+
+# Dashboard
+@app.route("/dashboard")
+def dashboard():
+    if "username" not in session:
+        return redirect("/login")
+
+    return render_template(
+        "dashboard.html",
+        username=session["username"]
+    )
+
+# Add Workout
+@app.route("/add_workout", methods=["POST"])
+def add_workout():
+    if "username" not in session:
+        return redirect("/login")
+
+    exercise = request.form["exercise"]
+    duration = int(request.form["duration"])
+    calories = int(request.form["calories"])
+
+    con = connect_db()
+    cur = con.cursor()
+
+    cur.execute(
+        """INSERT INTO workouts
+        (username,exercise,duration,calories)
+        VALUES(?,?,?,?)""",
+        (session["username"], exercise, duration, calories)
+    )
+
+    con.commit()
+    con.close()
+
+    return redirect("/dashboard")
+
+# Logout
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
+if __name__ == "__main__":
+    app.run(debug=True)
