@@ -1,0 +1,14 @@
+Fitness_Tracking_App/
+│
+├── app.py
+│
+├── fitness.db
+│
+├── templates/
+│   ├── index.html
+│   ├── register.html
+│   ├── login.html
+│   └── dashboard.html
+│
+└── static/
+    └── style.css
