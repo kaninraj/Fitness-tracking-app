@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fitness Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <h2>FITNESS TRACKER</h2>
+    <a href="/logout">Logout</a>
+</header>
+
+<div class="dashboard">
+
+    <h1>Welcome, {{ username }}! 💪</h1>
+    <p>Track your daily fitness activities.</p>
+
+    <div class="workout-form">
+        <h2>Add Your Workout</h2>
+
+        <form action="/add_workout" method="POST">
+
+            <input type="text"
+                   name="exercise"
+                   placeholder="Exercise Name (Running, Walking)"
+                   required>
+
+            <input type="number"
+                   name="duration"
+                   placeholder="Duration in Minutes"
+                   min="1"
+                   required>
+
+            <input type="number"
+                   name="calories"
+                   placeholder="Calories Burned"
+                   min="0"
+                   required>
+
+            <button type="submit">Add Workout</button>
+
+        </form>
+    </div>
+
+    <h2>Daily Fitness Goals</h2>
+    <p>🏃 Exercise regularly</p>
+    <p>💧 Drink enough water</p>
+    <p>🥗 Eat healthy food</p>
+    <p>😴 Get enough sleep</p>
+
+</div>
+
+</body>
+</html>
